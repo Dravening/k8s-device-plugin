@@ -3,6 +3,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -12,10 +13,26 @@ import (
 	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1beta1"
 )
 
+var (
+	mockDeviceNum = 0
+)
+
 func check(err error) {
 	if err != nil {
 		log.Panicln("Fatal:", err)
 	}
+}
+
+func mockGetDevices() []*pluginapi.Device {
+	n := uint(mockDeviceNum)
+	var devs []*pluginapi.Device
+	for i := uint(0); i < n; i++ {
+		devs = append(devs, &pluginapi.Device{
+			ID:     fmt.Sprintf("%v-%v", resourceName, i),
+			Health: pluginapi.Healthy,
+		})
+	}
+	return devs
 }
 
 func getDevices() []*pluginapi.Device {

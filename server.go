@@ -16,7 +16,7 @@ import (
 	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1beta1"
 )
 
-const (
+var (
 	resourceName           = "nvidia.com/gpu"
 	serverSock             = pluginapi.DevicePluginPath + "nvidia.sock"
 	envDisableHealthChecks = "DP_DISABLE_HEALTHCHECKS"
@@ -36,8 +36,12 @@ type NvidiaDevicePlugin struct {
 
 // NewNvidiaDevicePlugin returns an initialized NvidiaDevicePlugin
 func NewNvidiaDevicePlugin() *NvidiaDevicePlugin {
+	useFunc := getDevices
+	if mockDeviceNum != 0 {
+		useFunc = mockGetDevices
+	}
 	return &NvidiaDevicePlugin{
-		devs:   getDevices(),
+		devs:   useFunc(),
 		socket: serverSock,
 
 		stop:   make(chan interface{}),

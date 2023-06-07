@@ -3,8 +3,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"syscall"
 
 	"github.com/NVIDIA/gpu-monitoring-tools/bindings/go/nvml"
@@ -13,19 +15,42 @@ import (
 )
 
 func main() {
-	log.Println("Loading NVML")
-	if err := nvml.Init(); err != nil {
-		log.Printf("Failed to initialize NVML: %s.", err)
-		log.Printf("If this is a GPU node, did you set the docker default runtime to `nvidia`?")
-		log.Printf("You can check the prerequisites at: https://github.com/NVIDIA/k8s-device-plugin#prerequisites")
-		log.Printf("You can learn how to set the runtime at: https://github.com/NVIDIA/k8s-device-plugin#quick-start")
+	newResourceName := os.Getenv("DeviceName")
+	osDeviceNum := os.Getenv("MockDeviceNum")
 
-		select {}
+	if newResourceName == "" {
+		newResourceName = "d3os"
 	}
-	defer func() { log.Println("Shutdown of NVML returned:", nvml.Shutdown()) }()
+	resourceName = fmt.Sprintf("%s/gpu", newResourceName)
+
+	serverSock = fmt.Sprintf("%s%s.sock", pluginapi.DevicePluginPath, newResourceName)
+	if osDeviceNum != "" {
+		var err error
+		mockDeviceNum, err = strconv.Atoi(osDeviceNum)
+		if err != nil {
+			mockDeviceNum = 0
+		}
+	}
+
+	if mockDeviceNum == 0 {
+		log.Println("Loading NVML")
+		if err := nvml.Init(); err != nil {
+			log.Printf("Failed to initialize NVML: %s.", err)
+			log.Printf("If this is a GPU node, did you set the docker default runtime to `nvidia`?")
+			log.Printf("You can check the prerequisites at: https://github.com/NVIDIA/k8s-device-plugin#prerequisites")
+			log.Printf("You can learn how to set the runtime at: https://github.com/NVIDIA/k8s-device-plugin#quick-start")
+
+			select {}
+		}
+		defer func() { log.Println("Shutdown of NVML returned:", nvml.Shutdown()) }()
+	}
 
 	log.Println("Fetching devices.")
-	if len(getDevices()) == 0 {
+	useFunc := getDevices
+	if mockDeviceNum != 0 {
+		useFunc = mockGetDevices
+	}
+	if len(useFunc()) == 0 {
 		log.Println("No devices found. Waiting indefinitely.")
 		select {}
 	}
