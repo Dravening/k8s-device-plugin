@@ -19,9 +19,9 @@ func main() {
 	osDeviceNum := os.Getenv("MockDeviceNum")
 
 	if newResourceName == "" {
-		newResourceName = "d3os"
+		newResourceName = "mock"
 	}
-	resourceName = fmt.Sprintf("%s/gpu", newResourceName)
+	resourceName = fmt.Sprintf("%s.com/gpu", newResourceName)
 
 	serverSock = fmt.Sprintf("%s%s.sock", pluginapi.DevicePluginPath, newResourceName)
 	if osDeviceNum != "" {

@@ -1,0 +1,8 @@
+apiVersion: v2
+appVersion: 0.11.0
+description: A Helm chart for the mock-device-plugin on Kubernetes
+home: https://github.com/NVIDIA/k8s-device-plugin
+kubeVersion: '>= 1.10.0-0'
+name: mock-device-plugin
+type: application
+version: 0.11.0
