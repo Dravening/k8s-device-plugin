@@ -4,7 +4,14 @@
 
 ### 基本知识
 
-在本小节中，会对一些基本概念进行说明
+#### 宏观流程
+
+1. `device plugin`端启动自己服务, 地址为(`/var/lib/kubelet/device-plugins/sock.sock`).
+2. `device plugin`向地址为(`/var/lib/kubelet/device-plugins/kubelet.sock`)发送注册请求(含有`resoucename`以及自己服务的地址`/var/lib/kubelet/device-plugins/sock.sock`).
+3. `device manager`收到请求分配一个新的`endpoint`与该`device plugin`通过`device plugin`的`ListAndWatch`进行连接并通信.
+4.  当`device plugin`的`ListAndWatch`有变化时, 对应的`endpoint`会感知并通过回调函数告知`device manager`需要更新它的资源以及对应设备信息(`healthyDevices`和`unhealthyDevices`)
+
+#### 细节概念
 
 ##### kubelet_internal_checkpoint
 
